@@ -74,6 +74,7 @@
                     </select>
                     
                     <button class="btn btn-danger" id="addBook">Add Book</button>
+                    <button class="btn btn-danger" id="clearLocalStorage">Clear</button>
                 </form>
               </div>
         </div>
@@ -90,6 +91,12 @@
 </body>
 
 <script type="text/javascript">
+
+
+    document.getElementById("clearLocalStorage").onclick = function(){
+        
+        localStorage.clear();
+    }
 
     document.getElementById("addBook").onclick = function(){
         
