@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    
+
+    <Style>
+        /* * {
+            .border-radius(0) !important;
+            } */
+
+            #field {
+                margin-bottom:20px;
+            }
+    </Style>
+</head>
+<body>
+<div class="container">
+	<div class="row">
+		<input type="hidden" name="count" value="1" />
+        <div class="control-group" id="fields">
+            
+            <div class="controls" id="profs"> 
+                <form class="input-append">
+                    <div id="field">
+                        <input autocomplete="off" class="input" id="field1" name="prof1" type="text" placeholder="URL"/>
+                        
+                    </div>
+                </form>
+            <br>
+            <button id="b1" class="btn add-more" onclick="addURL()" type="button">+</button>
+            <small>Add URL</small>
+
+            <button id="b2" onclick="triggerButton()" class="btn trigger" type="button">+</button>
+            <small>Trigger Parallel</small>
+
+            <button id="b3" onclick="triggerButtonSeq()" class="btn trigger" type="button">+</button>
+            <small>Trigger Serial</small>
+
+            <button id="b4" onclick="triggerButtonSerialAsync()" class="btn trigger" type="button">+</button>
+            <small>Trigger Serial Async Await</small>
+
+            <button id="b5" onclick="triggerButtonParallelAsync()" class="btn trigger" type="button">+</button>
+            <small>Trigger Parallel Async Await</small>
+
+            </div>
+        </div>
+
+        <div class="results">
+            <table class="table table-responsive table-bordered" id="resultTable">
+                <thead>
+                    <th>Url</th>
+                    <th>Time Taken</th>
+                    <th>Status Code</th>
+                    <th>Output</th>
+                    <th>Progress</th>
+                </thead>
+                <tbody id="resultTableBody">
+
+                </tbody>
+                
+            </table>
+        </div>
+	</div>
+</div>
+</body>
+
+<script type="text/javascript">
+    var fieldCount = 1;
+
+    function addURL(){
+        //document.getElementById("field").innerHTML += `<input autocomplete="off" class="input" id='field_${fieldCount}' type="text" placeholder="Type something"/>`
+        
+        var inputControl = document.createElement('input');
+        inputControl.id = 'field_'+ fieldCount;
+        inputControl.type = 'text';
+        inputControl.placeholder = 'Add Url';
+        document.getElementById("field").appendChild(inputControl);
+        fieldCount+=1;
+        console.log('fieldCount',fieldCount);
+    }
+
+    function triggerButton(){
+        var table = document.getElementById('resultTableBody');
+        table.innerHTML = '';
+        debugger;
+        var urls = 
+        Array.from(document.getElementById("field").getElementsByTagName("input")).map(input => input.value);
+        sendReq(urls);
+    }
+
+    function ajax(url) {
+        debugger;
+        return new Promise(function(resolve, reject) {
+            const Http = new XMLHttpRequest();
+            const startTime = new Date();
+            debugger;
+            Http.onreadystatechange = function() {
+                debugger;
+
+                if(this.readyState == 4) {
+                    debugger;
+                    const endTime  = new Date();
+                    Http.timeTaken = endTime.getTime() - startTime.getTime();
+                    resolve(Http);
+                } 
+                // else if(this.readyState==4) {
+                //     reject(Http.responseText);
+                // }
+            }
+            Http.open("GET", url,true);
+            Http.send();
+        });
+    }
+
+    function showResult(response){
+       
+                //console.log('status success ' + j, response);
+                debugger;
+                var table = document.getElementById('resultTable');
+
+                var rowCount = table.rows.length;
+
+
+                var row = table.insertRow(rowCount);
+
+                var cell1 = row.insertCell(0);
+                cell1.innerHTML = response.responseURL;
+
+                var cell2 = row.insertCell(1);
+                cell2.innerHTML = response.timeTaken;
+
+                var cell3 = row.insertCell(2);
+                cell3.innerHTML = response.status;
+
+                var cell4 = row.insertCell(3);
+                cell4.innerHTML = `<button class="btn btn-secondary" data-toggle="modal" data-target="#myModal_${response.responseURL.hashCode()}" >Show Output</button>
+                <!-- Modal -->
+                    <div class="modal" id="myModal_${response.responseURL.hashCode()}" tabindex="-1" role="dialog">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Modal title</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <pre>${response.responseText}</pre>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary">Save changes</button>
+                            </div>
+                            </div>
+                        </div>
+                        </div>
+
+
+                `;
+              
+                
+
+                var cell5 = row.insertCell(4);
+                //cell5.innerHTML = response.responseText;
+    }
+
+    function sendReq(urls){ //parallel
+        // for(var i =0; i<urls.length; i++) {
+        //     var prom = ajax(urls[i]).then(showResult).catch((err)=>{
+        //         console.log('status error ' + i, err);
+        //     });
+        // }
+        
+
+       const promiseArrayUrl = urls.map(url=>{
+            return ajax(url).then(showResult);
+        });
+
+        const timestart = new Date();
+        Promise.all(promiseArrayUrl).then(
+            function(){
+                const timeEnd = new Date();
+                console.log('Time Taken parallel execution', timeEnd.getTime() - timestart.getTime());
+            }
+        );
+    }
+
+
+    function triggerButtonSeq(){
+        var table = document.getElementById('resultTableBody');
+        table.innerHTML = '';
+        debugger;
+        var urlsArray = 
+        Array.from(document.getElementById("field").getElementsByTagName("input")).map(input => input.value);
+        sendSerialReq(urlsArray);
+    }
+
+    function sendSerialReq(urls){
+
+        const startingTime = new Date();
+        let promiseChain = urls.reduce((start, url) => {
+             return start.then(() => ajax(url).then(showResult));
+            }, Promise.resolve());
+
+        promiseChain.then(()=>{
+
+            const endingTime = new Date();
+            console.log('Total Time Taken', endingTime.getTime()-startingTime.getTime());
+        });      
+
+
+
+        // const result = Promise.allSettled(urls);
+        // console.log(result.map(x=>x.status));
+
+        //Promise.all([a, b, c].map(p => p.catch(e => e))) .then(results => console.log(results)) // 1,Error: 2,3 .catch(e => console.log(e)); const console = { log: msg => div.innerHTML += msg + "<br>"};
+    }
+
+
+    function triggerButtonSerialAsync(){
+        var table = document.getElementById('resultTableBody');
+        table.innerHTML = '';
+        
+        var urlsArray = 
+        Array.from(document.getElementById("field").getElementsByTagName("input")).map(input => input.value);
+        asyncAwaitSerial(urlsArray);
+    }
+
+    async function asyncAwaitSerial(urls){
+        const startingTime = new Date();
+        for(let i = 0;i<urls.length; i++){
+            const response = await ajax(urls[i]);
+            showResult(response);
+        }
+
+        const endingTime = new Date();
+        console.log('Time taken async await serial ', endingTime.getTime() - startingTime.getTime());
+    }
+
+
+
+    function triggerButtonParallelAsync(){
+        var table = document.getElementById('resultTableBody');
+        table.innerHTML = '';
+        
+        var urlsArray = 
+        Array.from(document.getElementById("field").getElementsByTagName("input")).map(input => input.value);
+        asyncAwaitParallel(urlsArray);
+    }
+
+    async function asyncAwaitParallel(urls){
+        const startingTime = new Date();
+        const promiseArrayUrl = urls.map(url=>{
+            return ajax(url).then(showResult);
+        });
+
+
+        await Promise.all(promiseArrayUrl);
+
+        const timeEnd = new Date();
+        console.log('Time Taken async await parallel execution', timeEnd.getTime() - startingTime.getTime());
+    }
+
+
+    String.prototype.hashCode = function() {
+    var hash = 0;
+    if (this.length == 0) {
+        return hash;
+    }
+    for (var i = 0; i < this.length; i++) {
+        var char = this.charCodeAt(i);
+        hash = ((hash<<5)-hash)+char;
+        hash = hash & hash; // Convert to 32bit integer
+    }
+    return hash;
+}
+
+
+    
+</script>
+</html>
