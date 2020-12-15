@@ -1,125 +1,132 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
     <style>
-        .dashboard {
+        /* .wrapper{
             display: flex;
+        } */
+
+        .right-container{
+            background-color: crimson;
+            min-height:1000px;
         }
 
-        .item {
-            width: 33.33%;
+        .book-data-input{
+            margin-top: 50px;
         }
-    </style>
+
+        .book-name-pills{
+            margin-right: 10px;
+            margin-top:10px;
+            border-color: crimson;
+            color:crimson;
+        }
+
+        #book-information h1,h2,h3{
+            color: white;
+        }
+        /* .left-container{
+            flex: 2;
+        } */
+
+
+      </style>
 </head>
-
 <body>
-    <div class="dashboard">
-        <div class="item">
-            Temperature: <div id="temperature"></div>
-        </div>
-        <div class="item">
-            Humidity: <div id="humidity"></div>
-        </div>
-        <div class="item">
-            Air Pressure: <div id="air-pressure"></div>
-        </div>
+    <div class="container col-md-12">
+        
+   
 
+        <div class="left-container col-md-8">
+            <h1 class="text-center">Ninja's Reading List</h1>
+            <div id="bookList" class="row">
+            
+            </div>
+            
+            <div class="book-data-input container col-md-8">
+                <form class="form-group">
+                 
+                    <label for="bookName">Book name:</label>
+                    <input class="form-control" id="bookName" type="text">
+        
+                    <label for="genre">Genre:</label>
+                    <input class="form-control" id="bookGenre" type="text">
+        
+                    <label for="authorName">Author:</label>
+                    <select class="form-control" name="authors" id="authorName">
+                        <option value="0"></option>
+                        <option value="1">Henry</option>
+                        <option value="2">John</option>
+                        <option value="3">Tyrion</option>
+                    </select>
+                    
+                    <button class="btn btn-danger" id="addBook">Add Book</button>
+                    <button class="btn btn-danger" id="clearLocalStorage">Clear</button>
+                </form>
+              </div>
+        </div>
+        
+    
+        <div class="right-container col-md-4 100vh">
+            <div id="book-information" class="row">
+    
+            </div>
+        </div>
     </div>
+    
+     
 </body>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/6.6.3/rxjs.umd.min.js">
-</script>
-
-<script>
-
-    // var button = document.querySelector('button');
-    // Rx.Observable.fromEvent(button, 'click').subscribe(
-    //     (value) => console.log(value.clientX)
-    // );
+<script type="text/javascript">
 
 
-
-    // const observable = {
-    //     subscribe: observer => {
-    //         document.addEventListener("click", event => {
-    //             observer.next(event.clientX)
-    //         })
-    //     },
-    //     pipe: operator => {
-
-    //     },
-    // }
-
-    /* parseInt(100 + (Math.random() * 2000)) */
-
-    /* parseInt(100 + (Math.random() * 2000)) */
-
-    function convertObservableToBehaviorSubject(observable, initValue) {
-        const subject = new rxjs.BehaviorSubject(initValue);
-
-        observable.subscribe({
-            complete: () => subject.complete(),
-            error: x => subject.error(x),
-            next: x => subject.next(x)
-        });
-
-        return subject;
+    document.getElementById("clearLocalStorage").onclick = function(){
+        
+        localStorage.clear();
     }
 
-    const temperature$ = convertObservableToBehaviorSubject(new rxjs.Observable(subscriber => {
-        const fn = function () {
-            setTimeout(function () {
-                subscriber.next(Math.random() * 50);
-                fn();
-            }, 1000);
-        };
-        fn();
-    }), null);
+    document.getElementById("addBook").onclick = function(){
+        
+        var authorVal = document.getElementById("authorName");
+
+        var bookData = {
+        name: document.getElementById("bookName").value,
+        genre: document.getElementById("bookGenre").value,
+        authorName: authorVal.options[authorVal.selectedIndex].text
+        }
+        
+        localStorage.setItem(document.getElementById("bookName").value, JSON.stringify(bookData));
+        console.log('localstorage', localStorage);
+    }
+    
+    window.onload = function(){
+        
+        for (var i = 0; i < localStorage.length; i++){
+            document.getElementById("bookList").innerHTML += `<button class="book-name-pills btn btn-lg btn-default" onclick="loadBookInfo()" id="${localStorage.key(i)}"> ${localStorage.key(i)} </button>`;
+        }
 
 
-
-    const humidity$ = convertObservableToBehaviorSubject(new rxjs.Observable(subscriber => {
-        const fn = function () {
-            setTimeout(function () {
-                subscriber.next(Math.random() * 50);
-                fn();
-            }, 2000);
-        };
-        fn();
-    }), null);
-
-    const airPressure$ = convertObservableToBehaviorSubject(new rxjs.Observable(subscriber => {
-        const fn = function () {
-            setTimeout(function () {
-                subscriber.next(Math.random() * 50);
-                fn();
-            }, 5000);
-        };
-        fn();
-    }), null);
-
-    const displayObject$ = rxjs.combineLatest(temperature$, humidity$, airPressure$).pipe(
-        rxjs.operators.map(([temperature, humidity, airPressure]) => ({
-            temperature,
-            humidity,
-            airPressure
-        }))
-    );
-
-    displayObject$.subscribe(display => {
-        document.getElementById('temperature').innerHTML = display.temperature;
-        document.getElementById('humidity').innerHTML = display.humidity;
-        document.getElementById('air-pressure').innerHTML = display.airPressure;
-    })
+    };
 
 
-
+    function loadBookInfo(){
+            debugger;   
+                var itemObj = JSON.parse(localStorage.getItem(event.target.id));
+                document.getElementById("book-information").innerHTML = `<h1>${itemObj.name}</h1><h2>${itemObj.genre}</h2><h3>${itemObj.authorName}</h3>`;
+            }
 
 </script>
-
 </html>
