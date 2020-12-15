@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+        .dashboard {
+            display: flex;
+        }
+
+        .item {
+            width: 33.33%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard">
+        <div class="item">
+            Temperature: <div id="temperature"></div>
+        </div>
+        <div class="item">
+            Humidity: <div id="humidity"></div>
+        </div>
+        <div class="item">
+            Air Pressure: <div id="air-pressure"></div>
+        </div>
+
+    </div>
+</body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/6.6.3/rxjs.umd.min.js">
+</script>
+
+<script>
+
+    // var button = document.querySelector('button');
+    // Rx.Observable.fromEvent(button, 'click').subscribe(
+    //     (value) => console.log(value.clientX)
+    // );
+
+
+
+    // const observable = {
+    //     subscribe: observer => {
+    //         document.addEventListener("click", event => {
+    //             observer.next(event.clientX)
+    //         })
+    //     },
+    //     pipe: operator => {
+
+    //     },
+    // }
+
+    /* parseInt(100 + (Math.random() * 2000)) */
+
+    /* parseInt(100 + (Math.random() * 2000)) */
+
+    function convertObservableToBehaviorSubject(observable, initValue) {
+        const subject = new rxjs.BehaviorSubject(initValue);
+
+        observable.subscribe({
+            complete: () => subject.complete(),
+            error: x => subject.error(x),
+            next: x => subject.next(x)
+        });
+
+        return subject;
+    }
+
+    const temperature$ = convertObservableToBehaviorSubject(new rxjs.Observable(subscriber => {
+        const fn = function () {
+            setTimeout(function () {
+                subscriber.next(Math.random() * 50);
+                fn();
+            }, 1000);
+        };
+        fn();
+    }), null);
+
+
+
+    const humidity$ = convertObservableToBehaviorSubject(new rxjs.Observable(subscriber => {
+        const fn = function () {
+            setTimeout(function () {
+                subscriber.next(Math.random() * 50);
+                fn();
+            }, 2000);
+        };
+        fn();
+    }), null);
+
+    const airPressure$ = convertObservableToBehaviorSubject(new rxjs.Observable(subscriber => {
+        const fn = function () {
+            setTimeout(function () {
+                subscriber.next(Math.random() * 50);
+                fn();
+            }, 5000);
+        };
+        fn();
+    }), null);
+
+    const displayObject$ = rxjs.combineLatest(temperature$, humidity$, airPressure$).pipe(
+        rxjs.operators.map(([temperature, humidity, airPressure]) => ({
+            temperature,
+            humidity,
+            airPressure
+        }))
+    );
+
+    displayObject$.subscribe(display => {
+        document.getElementById('temperature').innerHTML = display.temperature;
+        document.getElementById('humidity').innerHTML = display.humidity;
+        document.getElementById('air-pressure').innerHTML = display.airPressure;
+    })
+
+
+
+
+</script>
+
+</html>
