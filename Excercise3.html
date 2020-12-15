@@ -71,37 +71,37 @@
         return subject;
     }
 
-    const temperature$ = convertObservableToBehaviorSubject(new rxjs.Observable(subscriber => {
+    const temperature$ = new rxjs.Observable(subscriber => {
         const fn = function () {
             setTimeout(function () {
                 subscriber.next(Math.random() * 50);
                 fn();
-            }, 1000);
+            }, parseInt(100 + (Math.random() * 1900)));
         };
         fn();
-    }), null);
+    });
 
 
 
-    const humidity$ = convertObservableToBehaviorSubject(new rxjs.Observable(subscriber => {
+    const humidity$ = new rxjs.Observable(subscriber => {
         const fn = function () {
             setTimeout(function () {
                 subscriber.next(Math.random() * 50);
                 fn();
-            }, 2000);
+            }, parseInt(100 + (Math.random() * 1900)));
         };
         fn();
-    }), null);
+    });
 
-    const airPressure$ = convertObservableToBehaviorSubject(new rxjs.Observable(subscriber => {
+    const airPressure$ = new rxjs.Observable(subscriber => {
         const fn = function () {
             setTimeout(function () {
                 subscriber.next(Math.random() * 50);
                 fn();
-            }, 5000);
+            }, parseInt(100 + (Math.random() * 1900)));
         };
         fn();
-    }), null);
+    });
 
     const displayObject$ = rxjs.combineLatest(temperature$, humidity$, airPressure$).pipe(
         rxjs.operators.map(([temperature, humidity, airPressure]) => ({
@@ -121,5 +121,4 @@
 
 
 </script>
-
 </html>
